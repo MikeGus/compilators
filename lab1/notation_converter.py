@@ -22,7 +22,6 @@ class NotationConverter:
         for current_idx, current_char in enumerate(text[:-1]):
             if current_char == '\\':
                 current_char += text[current_idx + 1]
-            print(current_char, ' ', [el for el in self.stack], ' ', result)
             if current_char not in self.operators_priority.keys() and current_char not in '()':
                 result += current_char
             elif current_char == '(':
@@ -49,4 +48,5 @@ if __name__ == '__main__':
     ]
     converter = NotationConverter(operators)
     text = 'a.(a|b)*.(a|b)'
-    print(converter.infix_to_postfix(text))
+    print('Infix: {}'.format(text))
+    print('Postfix: {}'.format(converter.infix_to_postfix(text)))
