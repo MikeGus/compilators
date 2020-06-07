@@ -19,9 +19,9 @@ class NotationConverter:
             return text
         text += '#'
         result = ''
-        for current_idx, current_char in enumerate(text[:-1]):
+        for current_char, next_char in zip(text[:-1], text[1:]):
             if current_char == '\\':
-                current_char += text[current_idx + 1]
+                current_char += next_char
             if current_char not in self.operators_priority.keys() and current_char not in '()':
                 result += current_char
             elif current_char == '(':
