@@ -15,13 +15,18 @@ class NotationConverter:
     # '\', '(', ')', '.' must be escaped w/ '\'
     def infix_to_postfix(self, text):
         self.stack.clear()
+        skip_next = False
         if len(text) <= 1:
             return text
         text += '#'
         result = ''
         for current_char, next_char in zip(text[:-1], text[1:]):
+            if skip_next:
+                skip_next = False
+                continue
             if current_char == '\\':
                 current_char += next_char
+                skip_next = True
             if current_char not in self.operators_priority.keys() and current_char not in '()':
                 result += current_char
             elif current_char == '(':
@@ -47,6 +52,6 @@ if __name__ == '__main__':
         for operator, priority in (('*', 2), ('.', 1), ('|', 0))
     ]
     converter = NotationConverter(operators)
-    text = 'a.(a|b)*.(a|b)'
+    text = 'a.b.c.(a.b|b.c)*.((a.\#|b.c).(a|b))*'
     print('Infix: {}'.format(text))
     print('Postfix: {}'.format(converter.infix_to_postfix(text)))
