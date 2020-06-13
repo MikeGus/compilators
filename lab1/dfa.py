@@ -10,7 +10,7 @@ TransitionKey = namedtuple('TransitionKey', ['state', 'symbol'])
 
 class DFA:
     # '|', '*', '.', '(', ')', '#', '\' should be escaped with '\'
-    def __init__(self, alphabet, regexp):
+    def __init__(self, regexp, alphabet=set(list(ascii_lowercase) + list(ascii_uppercase))):
         self.alphabet = alphabet
         replenished_regexp = regexp + '#'
         preprocessed_regexp = add_concatenation(replenished_regexp + '', '.', lambda x: x.isalpha() or x in ')*#', lambda x: x.isalpha() or x in '(#')
@@ -22,7 +22,6 @@ class DFA:
         converter = NotationConverter(operators)
 
         postfix_regexp = converter.infix_to_postfix(preprocessed_regexp)
-
         self.states = set()
         self.initial_state = None
         self.transitions = {}
@@ -186,7 +185,7 @@ class DFA:
 
 if __name__ == '__main__':
     regexp = '(a|b)*abb'
-    dfa = DFA(set(list(ascii_lowercase) + list(ascii_uppercase)), regexp)
+    dfa = DFA(regexp)
     print('Regexp: ', regexp)
     # print('DFA: ', str(dfa))
     dfa.minimize()
