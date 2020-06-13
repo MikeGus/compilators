@@ -13,4 +13,4 @@ def add_concatenation(text, concatenation_symbol, in_alphabet_1, in_alphabet_2):
 if __name__ == '__main__':
     text = 'abc(ab|bc)*((ac|bc)(a|b))*'
     print('Before: {}'.format(text))
-    print('After: {}'.format(add_concatenation(text, '.', lambda x: x.isalpha() or x in ')*', lambda x: x.isalpha() or x in '(')))
+    print('After: {}'.format(add_concatenation(text, '.', lambda x: x.isalpha() or x in ')*#', lambda x: x.isalpha() or x in '(#')))

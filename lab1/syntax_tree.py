@@ -112,7 +112,7 @@ class SyntaxTree:
                     self.position_nodes[position].followpos = self.position_nodes[position].followpos.union(node.right.firstpos)
 
     def __str__(self):
-        return str(self.root)
+        return 'Root Symbol: {}\n{}'.format(self.root.symbol, str(self.root))
 
 
 if __name__ == '__main__':
