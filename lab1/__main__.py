@@ -37,6 +37,14 @@ TEST_REGEXPS = {
         'bababbbaa': True,
         'bbabaabddss': True,
     },
+    '(ab)*': {
+        '': True,
+        'ab': True,
+        'a': True,
+        'babababababa': True,
+        'abababababab': True,
+        'abc': True,
+    },
     'ab*': {
         '': False,
         'b': False,
