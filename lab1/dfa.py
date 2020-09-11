@@ -12,7 +12,7 @@ class DFA:
     # '|', '*', '.', '(', ')', '#', '\' should be escaped with '\'
     def __init__(self, regexp, alphabet=set(list(ascii_lowercase) + list(ascii_uppercase))):
         self.alphabet = alphabet
-        replenished_regexp = regexp + '#'
+        replenished_regexp = regexp
         preprocessed_regexp = add_concatenation(replenished_regexp + '', '.', lambda x: x.isalpha() or x in ')*#', lambda x: x.isalpha() or x in '(#')
 
         operators = [
@@ -21,7 +21,8 @@ class DFA:
         ]
         converter = NotationConverter(operators)
 
-        postfix_regexp = converter.infix_to_postfix(preprocessed_regexp)
+        postfix_regexp = converter.infix_to_postfix(preprocessed_regexp) + '#.'
+        print('Postfix regexp: ', postfix_regexp)
         self.states = set()
         self.initial_state = None
         self.transitions = {}
@@ -55,10 +56,13 @@ class DFA:
                 self.final_states.add(state)
 
         # remove traces of '#'
-        self.states.remove(frozenset())
-        keys_to_remove = [key for key, value in self.transitions.items() if value == frozenset()]
-        for key in keys_to_remove:
-            self.transitions.pop(key)
+        try:
+            self.states.remove(frozenset())
+            keys_to_remove = [key for key, value in self.transitions.items() if value == frozenset()]
+            for key in keys_to_remove:
+                self.transitions.pop(key)
+        except Exception:
+            pass
 
         self.fake_state = frozenset()
         self.states.add(self.fake_state)
@@ -113,6 +117,7 @@ class DFA:
         return inequality_matrix
 
     def minimize(self):
+        print('Before minimization: {} states'.format(len(self.states)))
         states_map = {
             state: idx + 1
             for idx, state in enumerate(self.states.difference(set([self.fake_state])))
@@ -162,6 +167,7 @@ class DFA:
             if transition_key.state != self.fake_state and destination != self.fake_state
         }
         self.transitions = new_transitions
+        print('After minimization: {} states'.format(len(self.states)))
 
     def simulate(self, text):
         current_state = self.initial_state

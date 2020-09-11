@@ -70,7 +70,7 @@ class SyntaxTree:
                         right=right_node,
                         nullable=left_node.nullable or right_node.nullable,
                         firstpos=left_node.firstpos.union(right_node.firstpos),
-                        lastpos=left_node.firstpos.union(right_node.firstpos)
+                        lastpos=left_node.lastpos.union(right_node.lastpos)
                     )
                 )
             elif current_char == '.':
@@ -84,7 +84,7 @@ class SyntaxTree:
                         right=right_node,
                         nullable=left_node.nullable and right_node.nullable,
                         firstpos=left_node.firstpos.union(right_node.firstpos) if left_node.nullable else left_node.firstpos,
-                        lastpos=left_node.firstpos.union(right_node.firstpos) if right_node.nullable else right_node.lastpos
+                        lastpos=left_node.lastpos.union(right_node.lastpos) if right_node.nullable else right_node.lastpos
                     )
                 )
                 followpos_nodes.append(stack[-1])
