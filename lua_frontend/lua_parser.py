@@ -46,7 +46,7 @@ class ASTNode:
                 d[k] = json.loads(str(v))
             else:
                 d[k] = v
-        return json.dumps(d, indent=4, separators=(',', ': '))
+        return json.dumps(d, indent=4, separators=(',', ': '), sort_keys=True)
 
 
 class Chunk(ASTNode):
@@ -57,7 +57,6 @@ class Chunk(ASTNode):
 def p_chunk_block(p):
     'chunk : block'
     p[0] = Chunk(p[1])
-    print('Parsed chunk: ', str(p[0]))
 
 
 class Block(ASTNode):
@@ -133,8 +132,8 @@ class NameList(ASTNode):
 
 
 def p_name_list(p):
-    '''name_list : NAME COMMA name_list
-                 | NAME'''
+    '''name_list : name COMMA name_list
+                 | name'''
     if len(p) == 4:
         p[0] = NameList(p[1], p[2])
     else:
@@ -190,7 +189,7 @@ class GoTo(ASTNode):
 
 
 def p_goto(p):
-    'goto : GOTO NAME'
+    'goto : GOTO name'
     p[0] = GoTo(p[2])
 
 
@@ -226,7 +225,7 @@ def p_elsif_list(p):
 class If(ASTNode):
     def __init__(self, expression, block, elseif_list=None, lastblock=None):
         self.sequence = []
-        self.sequence.append(IfItem(expression, block))
+        self.sequence.append(IfItem(block, expression))
         if elseif_list is not None:
             self.sequence.extend(elseif_list.sequence)
         if lastblock is not None:
@@ -257,8 +256,8 @@ class ForLoop(ASTNode):
 
 
 def p_for_loop(p):
-    '''for_loop : FOR NAME ASSIGNMENT expression COMMA expression COMMA expression DO block END
-                | FOR NAME ASSIGNMENT expression COMMA expression DO block END
+    '''for_loop : FOR name ASSIGNMENT expression COMMA expression COMMA expression DO block END
+                | FOR name ASSIGNMENT expression COMMA expression DO block END
     '''
     if len(p) == 11:
         p[0] = ForLoop(p[2], p[4], p[6], p[10], p[8])
@@ -296,7 +295,7 @@ class LocalFunction(ASTNode):
 
 
 def p_local_function(p):
-    'local_function : LOCAL FUNCTION NAME funcbody'
+    'local_function : LOCAL FUNCTION name funcbody'
     p[0] = LocalFunction(p[3], p[4])
 
 
@@ -306,7 +305,7 @@ class Attribute(ASTNode):
 
 
 def p_attribute(p):
-    '''attribute : LESS_THAN NAME GREATER_THAN
+    '''attribute : LESS_THAN name GREATER_THAN
                  | empty'''
     if len(p) == 4:
         p[0] = Attribute(p[2])
@@ -321,7 +320,7 @@ class ObjectAttribute(ASTNode):
 
 
 def p_object_attribute(p):
-    'object_attribute : NAME attribute'
+    'object_attribute : name attribute'
     p[0] = ObjectAttribute(p[1], p[2])
 
 
@@ -402,7 +401,7 @@ class Label(ASTNode):
 
 
 def p_label(p):
-    'label : DOUBLE_COLON NAME DOUBLE_COLON'
+    'label : DOUBLE_COLON name DOUBLE_COLON'
     p[0] = Label(p[3])
 
 
@@ -414,8 +413,8 @@ class NameChain(ASTNode):
 
 
 def p_name_chain(p):
-    '''name_chain : NAME DOT name_chain
-                  | NAME'''
+    '''name_chain : name DOT name_chain
+                  | name'''
     if len(p) == 4:
         p[0] = NameChain(p[1], p[3])
     else:
@@ -430,7 +429,7 @@ class FuncName(ASTNode):
 
 
 def p_funcname(p):
-    '''funcname : name_chain COLON NAME
+    '''funcname : name_chain COLON name
                 | name_chain'''
     if len(p) == 4:
         p[0] = FuncName(p[1], p[3])
@@ -446,7 +445,7 @@ class ObjectField(ASTNode):
 
 def p_object_field(p):
     '''object_field : prefixexp SQUARE_LBRACKET expression SQUARE_RBRACKET
-                    | prefixexp DOT NAME'''
+                    | prefixexp DOT name'''
     if len(p) == 5:
         p[0] = ObjectField(p[1], p[3])
     else:
@@ -459,7 +458,7 @@ class Variable(ASTNode):
 
 
 def p_variable(p):
-    '''variable : NAME
+    '''variable : name
                 | object_field'''
     p[0] = Variable(p[1])
 
@@ -488,7 +487,7 @@ class FunctionCall(ASTNode):
 
 def p_functioncall(p):
     '''functioncall : prefixexp args
-                    | prefixexp COLON NAME args'''
+                    | prefixexp COLON name args'''
     if len(p) == 5:
         p[0] = FunctionCall(p[1], p[4], p[3])
     else:
@@ -504,7 +503,7 @@ def p_args(p):
     '''args : ROUND_LBRACKET expression_list ROUND_RBRACKET
             | ROUND_LBRACKET ROUND_RBRACKET
             | table_constructor
-            | LITERAL_STRING'''
+            | literal_string'''
     if len(p) == 4:
         p[0] = Args(p[2])
     elif len(p) == 2:
@@ -609,7 +608,7 @@ class Field(ASTNode):
 
 def p_field(p):
     '''field : SQUARE_LBRACKET expression SQUARE_RBRACKET ASSIGNMENT expression
-             | NAME ASSIGNMENT expression
+             | name ASSIGNMENT expression
              | expression'''
     if len(p) == 6:
         p[0] = Field(p[5], p[2])
@@ -628,8 +627,8 @@ def p_expression(p):
     '''expression : NIL
                   | FALSE
                   | TRUE
-                  | NUMBER
-                  | LITERAL_STRING
+                  | number
+                  | literal_string
                   | VARARG
                   | functiondef
                   | prefixexp
@@ -685,6 +684,36 @@ def p_unnary_operation(p):
     p[0] = UnaryOperation(p[2], p[1])
 
 
+class Name(ASTNode):
+    def __init__(self, name):
+        self.name = name
+
+
+def p_name(p):
+    'name : NAME'
+    p[0] = Name(p[1])
+
+
+class LiteralString(ASTNode):
+    def __init__(self, content):
+        self.content = content
+
+
+def p_literal_string(p):
+    'literal_string : LITERAL_STRING'
+    p[0] = LiteralString(p[1])
+
+
+class Number(ASTNode):
+    def __init__(self, value):
+        self.value = value
+
+
+def p_number(p):
+    'number : NUMBER'
+    p[0] = Number(p[1])
+
+
 precedence = (
     ('left', 'OR'),
     ('left', 'AND'),
@@ -730,8 +759,8 @@ def main():
 
     lexer = lex.lex(module=lua_lexer_rules)
     parser = yacc.yacc()
-    parser.parse(data, lexer=lexer)
-    print(parser)
+    ast = parser.parse(data, lexer=lexer)
+    print(ast)
 
 
 if __name__ == '__main__':
