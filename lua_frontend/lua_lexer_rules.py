@@ -76,8 +76,7 @@ def t_NAME(t):
 
 
 def t_NUMBER(t):
-    r'\d+'
-    r'(\d+|\d*\.\d+|\d+\.\d*)'
+    r'((\d*\.\d+)|(\d+\.\d*)|(\d+))'
     t.value = float(t.value)
     return t
 
