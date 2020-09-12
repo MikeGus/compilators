@@ -56,8 +56,8 @@ def p_chunk_block(p):
 
 
 class Block(ASTNode):
-    def __init__(self, statement_list, return_statement=None):
-        self.statement_list = statement_list
+    def __init__(self, statements, return_statement=None):
+        self.statements = statements
         self.return_statement = return_statement
 
 
@@ -99,7 +99,7 @@ def p_variable_list(p):
     '''variable_list : variable COMMA variable_list
                      | variable'''
     if len(p) == 4:
-        p[0] = VariableList(p[1], p[2])
+        p[0] = VariableList(p[1], p[3])
     else:
         p[0] = VariableList(p[1])
 
@@ -115,7 +115,7 @@ def p_expression_list(p):
     '''expression_list : expression COMMA expression_list
                        | expression'''
     if len(p) == 4:
-        p[0] = ExpressionList(p[1], p[2])
+        p[0] = ExpressionList(p[1], p[3])
     else:
         p[0] = ExpressionList(p[1])
 
@@ -131,15 +131,15 @@ def p_name_list(p):
     '''name_list : name COMMA name_list
                  | name'''
     if len(p) == 4:
-        p[0] = NameList(p[1], p[2])
+        p[0] = NameList(p[1], p[3])
     else:
         p[0] = NameList(p[1])
 
 
 class Assignment(ASTNode):
-    def __init__(self, variable_list, expression_list):
-        self.variable_list = variable_list
-        self.expression_list = expression_list
+    def __init__(self, variables, expressions):
+        self.variables = variables
+        self.expressions = expressions
 
 
 def p_assignment(p):
@@ -330,10 +330,10 @@ class ObjectAttributeList(ASTNode):
 def p_object_attribute_list(p):
     '''object_attribute_list : object_attribute COMMA object_attribute_list
                              | object_attribute'''
-    if len(p) == 5:
-        p[0] = ObjectAttributeList(p[2], p[4])
+    if len(p) == 4:
+        p[0] = ObjectAttributeList(p[1], p[3])
     else:
-        p[0] = ObjectAttributeList(p[2])
+        p[0] = ObjectAttributeList(p[1])
 
 
 class LocalObjectAttributeListAssignment(ASTNode):
@@ -344,7 +344,7 @@ class LocalObjectAttributeListAssignment(ASTNode):
 
 def p_local_object_attribute_list_assignment(p):
     '''local_object_attribute_list_assignment : LOCAL object_attribute_list ASSIGNMENT expression_list
-                                             | LOCAL object_attribute_list'''
+                                              | LOCAL object_attribute_list'''
     if len(p) == 5:
         p[0] = LocalObjectAttributeListAssignment(p[2], p[4])
     else:
@@ -503,7 +503,7 @@ def p_args(p):
     if len(p) == 4:
         p[0] = Args(p[2])
     elif len(p) == 2:
-        p[0] = Args(p[2])
+        p[0] = Args(p[1])
     else:
         p[0] = Args()
 
@@ -565,29 +565,22 @@ def p_table_constructor(p):
         p[0] = TableConstructor()
 
 
-def FieldList(ASTNode):
-    def __init__(self, field, fieldlist=None):
-        self.fields = [field]
-        if fieldlist is not None:
-            self.fields.extend(fieldlist.fields)
-
-
-class InnerFieldlist:
-    def __init__(self, field=None, fieldlist=None):
+class FieldList(ASTNode):
+    def __init__(self, field=None, fields=None):
         self.fields = []
         if field is not None:
             self.fields.append(field)
-        if fieldlist is not None:
-            self.fields.extend(fieldlist.fields)
+        if fields is not None:
+            self.fields.extend(fields.fields)
 
 
 def p_inner_fieldlist(p):
     '''inner_fieldlist : fieldsep field inner_fieldlist
                        | empty'''
     if len(p) == 4:
-        p[0] = InnerFieldlist(p[2], p[3])
+        p[0] = FieldList(p[2], p[3])
     else:
-        p[0] = InnerFieldlist()
+        p[0] = FieldList()
 
 
 def p_fieldlist(p):
@@ -627,10 +620,10 @@ def p_expression(p):
                   | literal_string
                   | VARARG
                   | functiondef
-                  | prefixexp
                   | table_constructor
                   | binop
-                  | unop'''
+                  | unop
+                  | prefixexp'''
     p[0] = Expression(p[1])
 
 
