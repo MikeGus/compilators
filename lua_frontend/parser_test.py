@@ -373,10 +373,10 @@ def test():
     parser = yacc.yacc(module=lua_parser)
 
     test_assignment(parser, lexer)
-    # test_binary_operation_priority(parser, lexer)
-    # test_binary_operation_priority_override(parser, lexer)
-    # test_table(parser, lexer)
-    # test_loop(parser, lexer)
+    test_binary_operation_priority(parser, lexer)
+    test_binary_operation_priority_override(parser, lexer)
+    test_table(parser, lexer)
+    test_loop(parser, lexer)
 
 
 if __name__ == '__main__':
